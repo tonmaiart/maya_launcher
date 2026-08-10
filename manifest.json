@@ -1,0 +1,9 @@
+{
+  "id": "maya_launcher",
+  "name": "Maya Launcher",
+  "version": "0.2.0",
+  "api_version": 1,
+  "entry_point": "plugin.py",
+  "description": "Launches Maya with the linked executable (via Software Linker), auto-setting the project to the repo root, and assembles Maya env vars from a shared bridge that independent Maya tool plugins (AdvancedSkeleton, MayaNgSkin, MayaToolkit, mGear, Ukore Browser, DreamwallPicker, StudioLibrary, PublishApi, MayaPublisher) contribute to, based on which are enabled for the active repo.",
+  "requires": ["software_linker"]
+}
