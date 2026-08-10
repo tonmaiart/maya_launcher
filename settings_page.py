@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 from PySide6.QtWidgets import QGroupBox, QLabel, QVBoxLayout, QWidget
 
 from core.exceptions import NotFoundError
-from plugins.repo_internal.maya_launcher.link_resolution import linked_key, pinned_version
+
+# Same standalone-repo import fix as plugin.py — see its comment.
+_PLUGIN_DIR = Path(__file__).resolve().parent
+if str(_PLUGIN_DIR) not in sys.path:
+    sys.path.insert(0, str(_PLUGIN_DIR))
+
+from link_resolution import linked_key, pinned_version
 
 SOFTWARE_LINKER_PLUGIN_ID = "software_linker"
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox
@@ -9,8 +10,17 @@ from PySide6.QtWidgets import QMessageBox
 from core.exceptions import NotFoundError
 from interface.program_launch_registry import ProgramLaunchSpec
 from interface.settings_tab_registry import CATEGORY_REPO, SettingsTabSpec
-from plugins.repo_internal.maya_launcher.link_resolution import linked_key, pinned_version
-from plugins.repo_internal.maya_launcher.settings_page import MayaLauncherSettingsPage
+
+# This plugin lives in its own standalone git repo (cloned into
+# cache/plugins/maya_launcher/), not inside UkoreHub's own `plugins`
+# package tree, so sibling files can't be reached via `plugins.repo_internal...`
+# — make this folder importable by its own bare module names instead.
+_PLUGIN_DIR = Path(__file__).resolve().parent
+if str(_PLUGIN_DIR) not in sys.path:
+    sys.path.insert(0, str(_PLUGIN_DIR))
+
+from link_resolution import linked_key, pinned_version
+from settings_page import MayaLauncherSettingsPage
 
 PLUGIN_ID = "maya_launcher"
 # Convention-only string match with plugins/core/software_linker/plugin.py
