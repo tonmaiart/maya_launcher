@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QGroupBox, QLabel, QVBoxLayout, QWidget
 
-from core.exceptions import NotFoundError
+from plugin_api import NotFoundError
 
 # Same standalone-repo import fix as plugin.py — see its comment.
 _PLUGIN_DIR = Path(__file__).resolve().parent

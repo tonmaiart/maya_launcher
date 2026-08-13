@@ -7,9 +7,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox
 
-from core.exceptions import NotFoundError
-from interface.program_launch_registry import ProgramLaunchSpec
-from interface.settings_tab_registry import CATEGORY_REPO, SettingsTabSpec
+from plugin_api import CATEGORY_REPO, NotFoundError, ProgramLaunchSpec, SettingsTabSpec
 
 # Standalone-repo import fix
 _PLUGIN_DIR = Path(__file__).resolve().parent
