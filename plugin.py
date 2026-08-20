@@ -168,12 +168,21 @@ def _find_linked_maya(api, repo) -> tuple[str, str] | None:
 def _prepare_env_and_plugins(
     api, repo, maya_version: str
 ) -> tuple[dict, list[str], list[dict]]:
-    """Bridge read + env-merge + force-load-plugin-names + active hooks resolution."""
+    """Bridge read + env-merge + force-load-plugin-names + active hooks resolution.
+
+    A tool's bridge entry (contributions/launch_hooks) or its id in
+    repo.required_plugin_ids can outlive the tool itself (renamed plugin,
+    deleted cache/plugins/ folder) with nothing to clean either up — so a
+    tool only ever activates here if it's also actually discovered via a
+    real manifest.json this launch, never off stale bridge/required_plugin_ids
+    data alone.
+    """
     all_contributions, _labels, all_hooks = _read_bridge(api)
-    enabled_tool_ids = set(repo.required_plugin_ids) & set(all_contributions)
-    
+    discovered_tool_ids = {p.manifest.id for p in api.plugin_catalog}
+    enabled_tool_ids = set(repo.required_plugin_ids) & set(all_contributions) & discovered_tool_ids
+
     contributions = {tid: c for tid, c in all_contributions.items() if tid in enabled_tool_ids}
-    if PUBLISH_API_TOOL_ID in all_contributions:
+    if PUBLISH_API_TOOL_ID in all_contributions and PUBLISH_API_TOOL_ID in discovered_tool_ids:
         contributions[PUBLISH_API_TOOL_ID] = all_contributions[PUBLISH_API_TOOL_ID]
 
     # Resolve hooks for enabled tools
