@@ -100,6 +100,21 @@ Tool plugins write to this bridge during their registration using `api.project_p
 
 ---
 
+### Caller-supplied post-open MEL (`UKORE_MAYA_AGENT_POST_MEL`)
+
+`_build_launch_commands` puts `os.environ["UKORE_MAYA_AGENT_POST_MEL"]`
+(if set) **first** in the MEL chain (right after the plug-in force-loads):
+MEL aborts a `-command` chain at its first error, so placed last it was
+skipped whenever the scene open or a tool hook errored. The caller defers
+its own work (AgentBridge wraps it in `evalDeferred`/`executeDeferred`) so
+it still runs after the scene is open.
+It's read from UkoreHub's **own** process environment and stripped from the
+env Maya gets. A caller in UkoreHub sets it right before calling
+`open_maya_file` / `launch_maya_standalone` and clears it right after; the
+`AgentBridge` core plugin does this so an AI agent can open a scene with the
+full pipeline env and then run its own script in that Maya. Unset = no
+change in behavior.
+
 ### 3. Link Resolution API (`link_resolution.py`)
 
 #### `linked_key(program, version="") -> str`

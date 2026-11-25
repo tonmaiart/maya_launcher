@@ -25,6 +25,15 @@ PUBLISH_API_TOOL_ID = "publish_api"
 
 MAYA_FILE_EXTENSIONS = [".ma", ".mb"]
 
+# One-shot caller MEL, set in UkoreHub's own process by a caller right before invoking the
+# opener/launcher and cleared right after -- the AgentBridge core plugin uses it so an AI
+# agent can open a scene with the full pipeline env and then run its own script in that same
+# Maya. Placed FIRST in the -command chain: MEL aborts the rest of a script at the first
+# error, and a scene open that reports a reference problem (or any tool hook failing) would
+# otherwise skip it. The caller defers its own work (evalDeferred / executeDeferred) so it
+# still runs after the scene is open.
+AGENT_POST_MEL_ENV = "UKORE_MAYA_AGENT_POST_MEL"
+
 
 def _maya_programs_for_repo(api, repo):
     """Every Program the repo requires whose name contains "maya"."""
@@ -100,6 +109,11 @@ def _build_launch_commands(
     # 5. Post-open MEL commands
     if post_mel_parts:
         mel_parts.append(" ".join(post_mel_parts))
+
+    # 0. Caller-supplied one-shot MEL, first so nothing above can skip it (see AGENT_POST_MEL_ENV)
+    agent_mel = os.environ.get(AGENT_POST_MEL_ENV, "").strip()
+    if agent_mel:
+        mel_parts.insert(0, agent_mel)
 
     return cli_flags, " ".join(mel_parts)
 
@@ -191,6 +205,7 @@ def _prepare_env_and_plugins(
     ]
 
     env = _build_maya_env(os.environ.copy(), contributions, maya_version or "")
+    env.pop(AGENT_POST_MEL_ENV, None)  # consumed by _build_launch_commands, not for Maya itself
     plugin_names = _force_load_plugin_names(contributions, maya_version or "")
     return env, plugin_names, active_hooks
 
